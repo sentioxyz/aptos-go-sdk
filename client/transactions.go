@@ -2,6 +2,7 @@ package client
 
 import (
 	"context"
+	"encoding/json"
 	"fmt"
 	"net/http"
 	"time"
@@ -34,14 +35,15 @@ type BlockMetadataTransaction struct {
 type TransactionResp struct {
 	BlockMetadataTransaction
 
-	Sender                  string                `json:"sender"`
-	SequenceNumber          string                `json:"sequence_number"`
-	Payload                 models.JSONPayload    `json:"payload"`
-	MaxGasAmount            string                `json:"max_gas_amount"`
-	GasUnitPrice            string                `json:"gas_unit_price"`
-	ExpirationTimestampSecs string                `json:"expiration_timestamp_secs"`
-	SecondarySigners        []string              `json:"secondary_signers"`
-	Signature               *models.JSONSignature `json:"signature,omitempty"`
+	Sender                  string             `json:"sender"`
+	SequenceNumber          string             `json:"sequence_number"`
+	Payload                 models.JSONPayload `json:"payload"`
+	MaxGasAmount            string             `json:"max_gas_amount"`
+	GasUnitPrice            string             `json:"gas_unit_price"`
+	ExpirationTimestampSecs string             `json:"expiration_timestamp_secs"`
+	SecondarySigners        []string           `json:"secondary_signers"`
+	Signature               json.RawMessage    `json:"signature,omitempty"`
+	//Signature               *models.JSONSignature `json:"signature,omitempty"`
 
 	Type                string          `json:"type"`
 	Timestamp           string          `json:"timestamp"`
