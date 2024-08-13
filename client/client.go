@@ -86,8 +86,22 @@ type ResponseHeader struct {
 	AptosOldestBlockHeight   uint64
 }
 
+type RequestHeader struct {
+	Key   string
+	Value string
+}
+
+type RequestOptions struct {
+	respHeader *ResponseHeader
+	ReqHeaders map[string]string
+}
+
 func request(ctx context.Context, method, endpoint string, reqBody, resp interface{},
-	query map[string]interface{}, respHeader *ResponseHeader) error {
+	query map[string]interface{}, options *RequestOptions) error {
+
+	if options == nil {
+		options = &RequestOptions{}
+	}
 
 	var reqBytes []byte
 	var err error
@@ -118,6 +132,10 @@ func request(ctx context.Context, method, endpoint string, reqBody, resp interfa
 		req.Header.Add("Content-Type", "application/x.aptos.signed_transaction+bcs")
 	} else {
 		req.Header.Add("Content-Type", "application/json")
+	}
+
+	for k, v := range options.ReqHeaders {
+		req.Header.Set(k, v)
 	}
 
 	if req.URL != nil && query != nil {
@@ -153,6 +171,7 @@ func request(ctx context.Context, method, endpoint string, reqBody, resp interfa
 		return err
 	}
 
+	respHeader := options.respHeader
 	if respHeader != nil {
 		if len(rsp.Header["X-Aptos-Block-Height"]) > 0 {
 			v, _ := new(big.Int).SetString(rsp.Header["X-Aptos-Block-Height"][0], 10)
@@ -192,11 +211,15 @@ func request(ctx context.Context, method, endpoint string, reqBody, resp interfa
 	return nil
 }
 
-func requestOptions(opts ...interface{}) (rspHeader *ResponseHeader) {
+func requestOptions(opts ...interface{}) (ret *RequestOptions) {
+	ret = &RequestOptions{}
+	ret.ReqHeaders = make(map[string]string)
 	for _, opt := range opts {
 		switch opt := opt.(type) {
 		case *ResponseHeader:
-			rspHeader = opt
+			ret.respHeader = opt
+		case *RequestHeader:
+			ret.ReqHeaders[opt.Key] = opt.Value
 		}
 	}
 	return
