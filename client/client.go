@@ -101,9 +101,6 @@ var userAgent string
 
 func init() {
 	userAgent = os.Getenv("APTOS_GO_SDK_USER_AGENT")
-	if userAgent == "" {
-		userAgent = "curl/7.85.0"
-	}
 }
 
 func request(ctx context.Context, method, endpoint string, reqBody, resp interface{},
@@ -136,6 +133,13 @@ func request(ctx context.Context, method, endpoint string, reqBody, resp interfa
 	req, err := http.NewRequestWithContext(ctx, method, endpoint, body)
 	if err != nil {
 		return err
+	}
+
+	if bearerToken := req.URL.Query().Get("_bearerToken"); bearerToken != "" {
+		q := req.URL.Query()
+		q.Del("_bearerToken")
+		req.Header.Add("Authorization", "Bearer "+bearerToken)
+		req.URL.RawQuery = q.Encode()
 	}
 
 	if isReqBodyTxn {
