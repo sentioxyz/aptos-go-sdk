@@ -8,6 +8,7 @@ import (
 	"io"
 	"math/big"
 	"net/http"
+	"os"
 	"time"
 
 	"github.com/the729/lcs"
@@ -96,6 +97,8 @@ type RequestOptions struct {
 	ReqHeaders map[string]string
 }
 
+var userAgent = os.Getenv("APTOS_GO_SDK_USER_AGENT")
+
 func request(ctx context.Context, method, endpoint string, reqBody, resp interface{},
 	query map[string]interface{}, options *RequestOptions) error {
 
@@ -136,6 +139,10 @@ func request(ctx context.Context, method, endpoint string, reqBody, resp interfa
 
 	for k, v := range options.ReqHeaders {
 		req.Header.Set(k, v)
+	}
+
+	if userAgent != "" {
+		req.Header.Set("User-Agent", userAgent)
 	}
 
 	if req.URL != nil && query != nil {
