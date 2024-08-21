@@ -135,11 +135,10 @@ func request(ctx context.Context, method, endpoint string, reqBody, resp interfa
 		return err
 	}
 
-	if bearerToken := req.URL.Query().Get("_bearerToken"); bearerToken != "" {
-		q := req.URL.Query()
-		q.Del("_bearerToken")
-		req.Header.Add("Authorization", "Bearer "+bearerToken)
-		req.URL.RawQuery = q.Encode()
+	if req.URL.User != nil && req.URL.User.Username() == "bearer" {
+		passwd, _ := req.URL.User.Password()
+		req.Header.Set("Authorization", "Bearer "+passwd)
+		req.URL.User = nil
 	}
 
 	if isReqBodyTxn {
