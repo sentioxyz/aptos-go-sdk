@@ -97,7 +97,14 @@ type RequestOptions struct {
 	ReqHeaders map[string]string
 }
 
-var userAgent = os.Getenv("APTOS_GO_SDK_USER_AGENT")
+var userAgent string
+
+func init() {
+	userAgent = os.Getenv("APTOS_GO_SDK_USER_AGENT")
+	if userAgent == "" {
+		userAgent = "curl/7.85.0"
+	}
+}
 
 func request(ctx context.Context, method, endpoint string, reqBody, resp interface{},
 	query map[string]interface{}, options *RequestOptions) error {
